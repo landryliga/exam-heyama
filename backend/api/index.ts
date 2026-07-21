@@ -4,16 +4,21 @@ import express from 'express';
 import { AppModule } from '../src/app.module';
 
 const server = express();
+let isAppInitialized = false;
 
-export const createServer = async (expressInstance: any) => {
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(expressInstance),
-  );
-  app.enableCors();
-  await app.init();
-};
+async function bootstrap() {
+  if (!isAppInitialized) {
+    const app = await NestFactory.create(
+      AppModule,
+      new ExpressAdapter(server),
+    );
+    app.enableCors();
+    await app.init();
+    isAppInitialized = true;
+  }
+}
 
-createServer(server);
-
-export default server;
+export default async function handler(req: any, res: any) {
+  await bootstrap();
+  server(req, res);
+}
