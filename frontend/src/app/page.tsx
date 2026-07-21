@@ -34,9 +34,14 @@ export default function Home() {
       setDescription('');
       setFile(null);
       await loadObjects();
-    } catch (err) {
+      alert('Succès ! Enregistrement réussi.');
+    } catch (err: any) {
       console.error('Erreur lors de la création:', err);
-      alert('Erreur lors de l\'enregistrement');
+
+      const status = err.response?.status || 'Inconnu';
+      const detailMessage = err.response?.data?.message || err.message || JSON.stringify(err);
+      
+      alert(`Échec (Code ${status}) : ${detailMessage}`);
     } finally {
       setLoading(false);
     }
