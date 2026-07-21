@@ -1,9 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
-import express from 'express';
+import express, { json, urlencoded } from 'express';
 import { AppModule } from '../src/app.module';
 
 const server = express();
+
+server.use(json({ limit: '10mb' }));
+server.use(urlencoded({ extended: true, limit: '10mb' }));
+
 let isAppInitialized = false;
 
 async function bootstrap() {
@@ -12,7 +16,13 @@ async function bootstrap() {
       AppModule,
       new ExpressAdapter(server),
     );
-    app.enableCors();
+
+    app.enableCors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      allowedHeaders: 'Content-Type, Accept, Authorization',
+    });
+
     await app.init();
     isAppInitialized = true;
   }
