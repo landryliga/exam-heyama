@@ -1,34 +1,39 @@
-import { Controller, Get, Post, Delete, Param, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { 
+  Controller, 
+  Post, 
+  Body, 
+  UseInterceptors, 
+  UploadedFile, 
+  BadRequestException 
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { S3Service } from '../s3.service';
 import { ObjectsService } from './objects.service';
 
 @Controller('objects')
 export class ObjectsController {
-  constructor(private readonly objectsService: ObjectsService) {}
+  constructor(
+    private readonly objectsService: ObjectsService,
+    private readonly s3Service: S3Service,
+  ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('file'))
   async create(
     @Body('title') title: string,
     @Body('description') description: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.objectsService.create(title, description, file);
-  }
+    if (!file) {
+      throw new BadRequestException('Le fichier image est obligatoire.');
+    }
 
-  @Get()
-  async findAll() {
-    return this.objectsService.findAll();
-  }
+    const imageUrl = await this.s3Service.uploadFile(file);
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.objectsService.findOne(id);
-  }
-
-  @Delete(':id')
-  async delete(@Param('id') id: string) {
-    await this.objectsService.delete(id);
-    return { success: true, message: 'Objet et image S3 supprimés avec succès' };
+    return this.objectsService.create({ 
+      title, 
+      description, 
+      imageUrl 
+    });
   }
 }
