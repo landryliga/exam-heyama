@@ -1,34 +1,24 @@
 import { NestFactory } from '@nestjs/core';
-import { ExpressAdapter } from '@nestjs/platform-express';
-import express, { json, urlencoded } from 'express';
 import { AppModule } from '../src/app.module';
+import { ExpressAdapter } from '@nestjs/platform-express';
+import express from 'express';
 
 const server = express();
 
-server.use(json({ limit: '10mb' }));
-server.use(urlencoded({ extended: true, limit: '10mb' }));
+export const createNestServer = async (expressInstance) => {
+  const app = await NestFactory.create(
+    AppModule,
+    new ExpressAdapter(expressInstance),
+  );
+  
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
 
-let isAppInitialized = false;
+  await app.init();
+};
 
-async function bootstrap() {
-  if (!isAppInitialized) {
-    const app = await NestFactory.create(
-      AppModule,
-      new ExpressAdapter(server),
-    );
+createNestServer(server);
 
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      allowedHeaders: 'Content-Type, Accept, Authorization',
-    });
-
-    await app.init();
-    isAppInitialized = true;
-  }
-}
-
-export default async function handler(req: any, res: any) {
-  await bootstrap();
-  server(req, res);
-}
+export default server; 
