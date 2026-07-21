@@ -7,7 +7,7 @@ import {
   BadRequestException 
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { S3Service } from '../s3.service';
+import { S3Service } from './s3.service';
 import { ObjectsService } from './objects.service';
 
 @Controller('objects')
@@ -30,10 +30,7 @@ export class ObjectsController {
 
     const imageUrl = await this.s3Service.uploadFile(file);
 
-    return this.objectsService.create({ 
-      title, 
-      description, 
-      imageUrl 
-    });
+    
+    return this.objectsService.create(title, description, imageUrl);
   }
 }

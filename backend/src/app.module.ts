@@ -3,8 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ObjectsModule } from './objects/objects.module';
-import { S3Service } from './s3.service';
+import { ObjectsModule } from './modules/objets/objects.module';
+import { S3Service } from './modules/objets/s3.service'; 
 
 @Module({
   imports: [
