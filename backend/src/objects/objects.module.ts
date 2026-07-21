@@ -1,21 +1,16 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ObjectsModule } from './objects/objects.module';
-import { S3Service } from './s3.service';
+import { ObjectsController } from './objects.controller';
+import { ObjectsService } from './objects.service';
+import { ObjectSchema, AppObject } from './schemas/object.schema';
+import { S3Service } from '../s3.service'; 
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://mongo:27017/heyama-exam'),
-    ObjectsModule,
+    MongooseModule.forFeature([{ name: AppObject.name, schema: ObjectSchema }]),
   ],
-  controllers: [AppController],
-  providers: [
-    AppService,
-    S3Service,
-  ],
+  controllers: [ObjectsController],
+  providers: [ObjectsService, S3Service],
+  exports: [ObjectsService],
 })
-export class AppModule {}
+export class ObjectsModule {}
