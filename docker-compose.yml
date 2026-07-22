@@ -38,7 +38,7 @@ services:
       # URL locale du backend pour l'environnement Docker Compose
       #- NEXT_PUBLIC_API_URL=http://localhost:3000
       # Si tu souhaites cibler le backend distant sur Vercel à la place, utilise :
-      - NEXT_PUBLIC_API_URL=https://exam-heyama.vercel.app
+      - NEXT_PUBLIC_API_URL=https://exam-heyama-6i1m.vercel.app/
     depends_on:
       - backend
 
