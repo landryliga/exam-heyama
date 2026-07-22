@@ -35,7 +35,7 @@ services:
       - /app/node_modules
       - /app/.next
     environment:
-      - NEXT_PUBLIC_API_URL=https://votre-projet.vercel.app
+      - NEXT_PUBLIC_API_URL=https://exam-heyama-6i1m-git-1x-landry-liga-bell.vercel.app
     depends_on:
       - backend
 
