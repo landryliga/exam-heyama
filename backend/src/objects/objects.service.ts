@@ -13,12 +13,12 @@ export class ObjectsService {
     @InjectModel(AppObject.name) private objectModel: Model<ObjectDocument>,
   ) {
     this.s3Client = new S3Client({
-      region: process.env.S3_REGION || 'us-east-1',
-      endpoint: process.env.S3_ENDPOINT,
+      region: process.env.S3_REGION || process.env.AWS_REGION || 'eu-west-1',
+      endpoint: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT,
       forcePathStyle: true,
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+        accessKeyId: process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
       },
     });
   }
@@ -28,7 +28,6 @@ export class ObjectsService {
       throw new BadRequestException('Un fichier image est obligatoire.');
     }
 
-    
     const fileKey = `${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
 
     try {
@@ -41,14 +40,24 @@ export class ObjectsService {
         }),
       );
 
-      const publicBaseUrl = process.env.S3_PUBLIC_URL || `${process.env.S3_ENDPOINT}/${this.bucketName}`;
-      const imageUrl = `${publicBaseUrl}/${fileKey}`;
+      // Construction dynamique et propre de l'URL publique Supabase
+      const endpoint = process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT || '';
+      
+      // Conversion de "https://xyz.storage.supabase.co/storage/v1/s3" -> "https://xyz.supabase.co"
+      const baseUrl = endpoint
+        .replace('.storage.supabase.co', '.supabase.co')
+        .replace(/\/storage\/v1\/s3\/?$/, '');
+
+      // Format d'URL publique directe pour balise <img>
+      const imageUrl = process.env.S3_PUBLIC_URL 
+        ? `${process.env.S3_PUBLIC_URL}/${fileKey}`
+        : `${baseUrl}/storage/v1/object/public/${this.bucketName}/${fileKey}`;
 
       const newObject = new this.objectModel({ title, description, imageUrl });
       return await newObject.save();
 
     } catch (error) {
-      console.error(" Erreur Upload S3 :", error);
+      console.error("Erreur Upload S3 :", error);
       throw new BadRequestException(`Échec de l'envoi vers S3 : ${error.message}`);
     }
   }

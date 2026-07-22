@@ -2,6 +2,8 @@ import {
   Controller, 
   Get, 
   Post, 
+  Delete,
+  Param,  
   Body, 
   UseInterceptors, 
   UploadedFile, 
@@ -33,5 +35,10 @@ export class ObjectsController {
     }
 
     return this.objectsService.create(title, description, file);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return this.objectsService.delete(id);
   }
 }

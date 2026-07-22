@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchObjects, createObject, deleteObject, AppObject } from '../lib/api';
 
-export default function ObjectManager() {
+export default function Home() {
   const [objects, setObjects] = useState<AppObject[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -23,6 +23,14 @@ export default function ObjectManager() {
     }
   };
 
+  // 💡 Fonction pour garantir que l'URL pointe bien vers le chemin public Supabase
+  const getPublicImageUrl = (url: string) => {
+    if (!url) return '';
+    return url
+      .replace('.storage.supabase.co', '.supabase.co')
+      .replace(/\/storage\/v1\/s3\/?/, '/storage/v1/object/public/');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return alert('Veuillez sélectionner un fichier');
@@ -34,9 +42,14 @@ export default function ObjectManager() {
       setDescription('');
       setFile(null);
       await loadObjects();
-    } catch (err) {
+      alert('Succès ! Enregistrement réussi.');
+    } catch (err: any) {
       console.error('Erreur lors de la création:', err);
-      alert('Erreur lors de l\'enregistrement');
+
+      const status = err.response?.status || 'Inconnu';
+      const detailMessage = err.response?.data?.message || err.message || JSON.stringify(err);
+      
+      alert(`Échec (Code ${status}) : ${detailMessage}`);
     } finally {
       setLoading(false);
     }
@@ -49,20 +62,23 @@ export default function ObjectManager() {
         setObjects(objects.filter((obj) => obj._id !== id));
       } catch (err) {
         console.error('Erreur lors de la suppression:', err);
+        alert('Échec de la suppression.');
       }
     }
   };
 
   return (
-    <div style={{ maxWidth: '650px', margin: '40px auto', padding: '0 20px', fontFamily: 'Arial, sans-serif' }}>
+    <main style={{ minHeight: '100vh', backgroundColor: '#f9fafb', padding: '40px 20px', fontFamily: 'sans-serif' }}>
       
-      {/* CARD PRINCIPALE : BORDURE VIOLETTE (EXACTEMENT COMME SUR L'IMAGE) */}
+      {/* CARD PRINCIPALE : BORDURE VIOLETTE */}
       <div style={{
+        maxWidth: '650px',
+        margin: '0 auto 40px auto',
         backgroundColor: '#ffffff',
-        border: '8px solid #9333ea',
+        border: '8px solid #a855f7',
         padding: '40px 30px',
         textAlign: 'center',
-        boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
+        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
       }}>
         
         {/* TITRE */}
@@ -70,25 +86,25 @@ export default function ObjectManager() {
           fontSize: '32px',
           fontWeight: '300',
           letterSpacing: '2px',
-          color: '#262626',
+          color: '#1f2937',
           textTransform: 'uppercase',
           marginBottom: '20px',
           lineHeight: '1.2'
         }}>
-          FAIRE UNE <br />
+          FAIRE UN <br />
           <span style={{ fontWeight: '400' }}>ENREGISTREMENT</span>
         </h2>
 
-        {/* PARAGRAPHE DESCRIPTIF */}
+        {/* PARAGRAPHE D'INTRODUCTION */}
         <p style={{
-          color: '#525252',
+          color: '#4b5563',
           fontSize: '14px',
           lineHeight: '1.6',
           maxWidth: '480px',
           margin: '0 auto 30px auto',
           fontWeight: '300'
         }}>
-          «  enregistrement des objets faites ici. le champs image est obligatoire »
+          « enregistrement des objets faites ici. le champs image est obligatoire »
         </p>
 
         {/* FORMULAIRE */}
@@ -104,12 +120,10 @@ export default function ObjectManager() {
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                border: '1px solid #d4d4d4',
+                border: '1px solid #d1d5db',
                 fontSize: '14px',
                 outline: 'none',
-                boxSizing: 'border-box',
-                backgroundColor: '#ffffff',
-                color: '#333333'
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -124,13 +138,11 @@ export default function ObjectManager() {
               style={{
                 width: '100%',
                 padding: '12px 14px',
-                border: '1px solid #d4d4d4',
+                border: '1px solid #d1d5db',
                 fontSize: '14px',
                 outline: 'none',
                 resize: 'none',
-                boxSizing: 'border-box',
-                backgroundColor: '#ffffff',
-                color: '#333333'
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -143,11 +155,10 @@ export default function ObjectManager() {
               style={{
                 width: '100%',
                 fontSize: '13px',
-                color: '#525252',
-                border: '1px solid #d4d4d4',
+                color: '#6b7280',
+                border: '1px solid #d1d5db',
                 padding: '8px',
-                boxSizing: 'border-box',
-                backgroundColor: '#ffffff'
+                boxSizing: 'border-box'
               }}
             />
           </div>
@@ -157,15 +168,14 @@ export default function ObjectManager() {
               type="submit"
               disabled={loading}
               style={{
-                backgroundColor: '#9333ea',
+                backgroundColor: '#a855f7',
                 color: '#ffffff',
                 padding: '12px 36px',
                 fontSize: '14px',
                 border: 'none',
                 cursor: 'pointer',
                 fontWeight: '500',
-                opacity: loading ? 0.6 : 1,
-                borderRadius: '0px'
+                opacity: loading ? 0.6 : 1
               }}
             >
               {loading ? 'Envoi...' : 'Soumettre'}
@@ -174,63 +184,105 @@ export default function ObjectManager() {
         </form>
       </div>
 
-      {/* RÉSULTATS / LISTE DES ENTRÉES EN BAS */}
+      {/* ENTRÉES ENREGISTRÉES */}
       <div style={{
-        marginTop: '30px',
+        maxWidth: '650px',
+        margin: '0 auto',
         backgroundColor: '#ffffff',
         border: '1px solid #e9d5ff',
-        padding: '20px',
-        borderRadius: '4px'
+        padding: '20px'
       }}>
-        <h3 style={{ fontSize: '16px', color: '#404040', marginBottom: '15px', textAlign: 'center' }}>
+        <h3 style={{ fontSize: '16px', color: '#374151', marginBottom: '15px', textAlign: 'center' }}>
           Entrées enregistrées ({objects.length})
         </h3>
 
         {objects.length === 0 ? (
-          <p style={{ color: '#a3a3a3', textAlign: 'center', fontSize: '14px' }}>
+          <p style={{ color: '#9ca3af', textAlign: 'center', fontSize: '14px' }}>
             Aucune donnée pour le moment.
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {objects.map((obj) => (
-              <div
-                key={obj._id}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '10px 0',
-                  borderBottom: '1px solid #f5f5f5',
-                  fontSize: '14px'
-                }}
-              >
-                <div>
-                  <strong style={{ color: '#171717', display: 'block' }}>{obj.title}</strong>
-                  <span style={{ color: '#737373', fontSize: '13px' }}>{obj.description}</span>
-                  <div style={{ color: '#9333ea', fontSize: '12px', fontFamily: 'monospace', marginTop: '2px' }}>
-                    📎 {obj.imageUrl ? obj.imageUrl.split('/').pop() : ''}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDelete(obj._id)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {objects.map((obj) => {
+              // Nettoyage de l'URL pour garantir la lecture publique
+              const publicUrl = getPublicImageUrl(obj.imageUrl);
+
+              return (
+                <div
+                  key={obj._id}
                   style={{
-                    backgroundColor: 'transparent',
-                    border: '1px solid #fca5a5',
-                    color: '#dc2626',
-                    padding: '4px 8px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    borderRadius: '3px'
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '10px 0',
+                    borderBottom: '1px solid #f3f4f6',
+                    fontSize: '14px'
                   }}
                 >
-                  Supprimer
-                </button>
-              </div>
-            ))}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Miniature Image */}
+                    {publicUrl && (
+                      <img
+                        src={publicUrl}
+                        alt={obj.title}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          objectFit: 'cover',
+                          borderRadius: '4px',
+                          border: '1px solid #e5e7eb'
+                        }}
+                      />
+                    )}
+
+                    <div>
+                      <strong style={{ color: '#111827', display: 'block' }}>{obj.title}</strong>
+                      <span style={{ color: '#4b5563', fontSize: '13px' }}>{obj.description}</span>
+                      
+                      {/* LIEN DE FICHIER CLIQUABLE */}
+                      {publicUrl && (
+                        <div style={{ marginTop: '4px' }}>
+                          <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: '#a855f7',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              textDecoration: 'underline',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            Voir / Ouvrir le fichier ({obj.imageUrl ? obj.imageUrl.split('/').pop() : 'fichier'})
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleDelete(obj._id)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: '1px solid #fca5a5',
+                      color: '#ef4444',
+                      padding: '4px 8px',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      borderRadius: '4px'
+                    }}
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-    </div>
+    </main>
   );
 }

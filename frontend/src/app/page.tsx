@@ -23,6 +23,14 @@ export default function Home() {
     }
   };
 
+  // 💡 Fonction pour garantir que l'URL pointe bien vers le chemin public Supabase
+  const getPublicImageUrl = (url: string) => {
+    if (!url) return '';
+    return url
+      .replace('.storage.supabase.co', '.supabase.co')
+      .replace(/\/storage\/v1\/s3\/?/, '/storage/v1/object/public/');
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return alert('Veuillez sélectionner un fichier');
@@ -54,6 +62,7 @@ export default function Home() {
         setObjects(objects.filter((obj) => obj._id !== id));
       } catch (err) {
         console.error('Erreur lors de la suppression:', err);
+        alert('Échec de la suppression.');
       }
     }
   };
@@ -194,7 +203,8 @@ export default function Home() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {objects.map((obj) => {
-              const fileUrl = obj.imageUrl;
+              // Nettoyage de l'URL pour garantir la lecture publique
+              const publicUrl = getPublicImageUrl(obj.imageUrl);
 
               return (
                 <div
@@ -208,31 +218,48 @@ export default function Home() {
                     fontSize: '14px'
                   }}
                 >
-                  <div>
-                    <strong style={{ color: '#111827', display: 'block' }}>{obj.title}</strong>
-                    <span style={{ color: '#4b5563', fontSize: '13px' }}>{obj.description}</span>
-                    
-                    {/* LIEN DE FICHIER CLIQUABLE */}
-                    {fileUrl && (
-                      <div style={{ marginTop: '4px' }}>
-                        <a
-                          href={fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: '#a855f7',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            textDecoration: 'underline',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                           Voir / Ouvrir le fichier ({obj.imageUrl ? obj.imageUrl.split('/').pop() : 'fichier'})
-                        </a>
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Miniature Image */}
+                    {publicUrl && (
+                      <img
+                        src={publicUrl}
+                        alt={obj.title}
+                        style={{
+                          width: '50px',
+                          height: '50px',
+                          objectFit: 'cover',
+                          borderRadius: '4px',
+                          border: '1px solid #e5e7eb'
+                        }}
+                      />
                     )}
+
+                    <div>
+                      <strong style={{ color: '#111827', display: 'block' }}>{obj.title}</strong>
+                      <span style={{ color: '#4b5563', fontSize: '13px' }}>{obj.description}</span>
+                      
+                      {/* LIEN DE FICHIER CLIQUABLE */}
+                      {publicUrl && (
+                        <div style={{ marginTop: '4px' }}>
+                          <a
+                            href={publicUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: '#a855f7',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              textDecoration: 'underline',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            Voir / Ouvrir le fichier ({obj.imageUrl ? obj.imageUrl.split('/').pop() : 'fichier'})
+                          </a>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <button
