@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      'https://exam-heyama.vercel.app/',
+      'https://exam-heyama.vercel.app',
       'http://localhost:3000',
       'http://localhost:3001',
     ],
