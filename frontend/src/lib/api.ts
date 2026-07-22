@@ -5,7 +5,7 @@ export interface AppObject {
     imageUrl: string;
   }
   
-  const API_URL = 'http://127.0.0.1:3000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://votre-projet.vercel.app';
   
   export async function fetchObjects(): Promise<AppObject[]> {
     const res = await fetch(`${API_URL}/objects`);
