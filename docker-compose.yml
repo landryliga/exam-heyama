@@ -35,7 +35,7 @@ services:
       - /app/node_modules
       - /app/.next
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=https://votre-projet.vercel.app
     depends_on:
       - backend
 
@@ -46,12 +46,11 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  # --- SERVICE S3 LOCAL (MINIO via Quay.io) ---
   minio:
     image: quay.io/minio/minio:RELEASE.2024-01-18T22-51-28Z
     ports:
       - "9000:9000" # API S3
-      - "9001:9001" # Console d'administration
+      - "9001:9001" 
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
