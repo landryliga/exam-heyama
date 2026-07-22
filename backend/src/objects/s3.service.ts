@@ -34,12 +34,12 @@ export class S3Service {
       }),
     );
 
-
     const endpoint = process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT || '';
 
-    
-    const baseUrl = endpoint.replace(/\/storage\/v1\/s3\/?$/, '');
+    let publicHost = endpoint.replace('.storage.supabase.co', '.supabase.co');
 
-    return `${baseUrl}/storage/v1/object/public/${bucketName}/${fileName}`;
+    publicHost = publicHost.replace(/\/storage\/v1\/s3\/?$/, '');
+
+    return `${publicHost}/storage/v1/object/public/${bucketName}/${fileName}`;
   }
 }
