@@ -1,5 +1,6 @@
 import { 
   Controller, 
+  Get, 
   Post, 
   Body, 
   UseInterceptors, 
@@ -15,6 +16,11 @@ export class ObjectsController {
     private readonly objectsService: ObjectsService,
   ) {}
 
+  @Get()
+  async findAll() {
+    return this.objectsService.findAll(); 
+  }
+
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async create(
@@ -25,7 +31,6 @@ export class ObjectsController {
     if (!file) {
       throw new BadRequestException('Le fichier image est obligatoire.');
     }
-
 
     return this.objectsService.create(title, description, file);
   }
