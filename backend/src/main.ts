@@ -20,7 +20,7 @@ app.enableCors({
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
-  allowedHeaders: [
+  allowedHeaders: [ 
     'Origin',
     'X-Requested-With',
     'Content-Type',
