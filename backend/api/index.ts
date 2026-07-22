@@ -12,7 +12,11 @@ export const createNestServer = async (expressInstance: any) => {
   );
 
   app.enableCors({
-    origin: true,
+    origin: [
+      'https://exam-heyama.vercel.app/',
+      'http://localhost:3000',
+      'http://localhost:3001',
+    ],
     credentials: true,
   });
 
