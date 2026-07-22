@@ -17,7 +17,7 @@ export async function fetchObjects(): Promise<AppObject[]> {
     throw new Error("Erreur de communication : Le backend a renvoyé une page HTML au lieu de données.");
   }
 
-  return res.json();
+  return res.json(); 
 }
 
 export async function createObject(title: string, description: string, file: File): Promise<AppObject> {
