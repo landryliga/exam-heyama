@@ -5,7 +5,7 @@ export interface AppObject {
   imageUrl: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://exam-heyama.vercel.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://exam-heyama-6i1m.vercel.app';
 
 export async function fetchObjects(): Promise<AppObject[]> {
   const res = await fetch(`${API_URL}/objects`);
