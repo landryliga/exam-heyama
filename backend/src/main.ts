@@ -1,44 +1,31 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
-import * as fs from 'fs';
+app.enableCors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
 
-async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  app.enableCors({
-    origin: [
+    const allowedOrigins = [
       'https://exam-heyama.vercel.app',
+      'https://exam-heyama-git-1x-landry-liga-bell.vercel.app',
+      'https://exam-heyama-933ay94ru-landry-liga-bell.vercel.app',
       'http://localhost:3000',
       'http://localhost:3001',
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
-    allowedHeaders: [
-      'Origin',
-      'X-Requested-With',
-      'Content-Type',
-      'Accept',
-      'Authorization',
-    ],
-    credentials: true,
-  });
+    ];
 
-  try {
-    const publicPath = join(process.cwd(), 'public');
-    const mocksPath = join(publicPath, 'mocks');
+    // Regex pour accepter n'importe quel futur sous-domaine Vercel lié à ton projet
+    const isVercelApp = /^https:\/\/exam-heyama.*\.vercel\.app$/.test(origin);
 
-    if (!fs.existsSync(mocksPath)) {
-      fs.mkdirSync(mocksPath, { recursive: true });
+    if (allowedOrigins.includes(origin) || isVercelApp) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Origine non autorisée par CORS: ${origin}`));
     }
-
-    app.useStaticAssets(publicPath, { prefix: '/public/' });
-    app.useStaticAssets(mocksPath, { prefix: '/mocks/' });
-  } catch (error) {
-    console.warn('Gestion du dossier statique ignorée (lecture seule) :', error.message);
-  }
-
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
-}
-bootstrap();
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+  ],
+  credentials: true,
+});
