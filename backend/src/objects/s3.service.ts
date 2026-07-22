@@ -7,18 +7,22 @@ export class S3Service {
 
   constructor() {
     this.s3Client = new S3Client({
-      endpoint: process.env.S3_ENDPOINT,
-      region: process.env.S3_REGION || 'us-east-1',
+      endpoint: process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT,
+      region: process.env.S3_REGION || process.env.AWS_REGION || 'eu-west-1',
       credentials: {
-        accessKeyId: process.env.S3_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.S3_SECRET_ACCESS_KEY!,
+        accessKeyId:
+          process.env.S3_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey:
+          process.env.S3_SECRET_ACCESS_KEY ||
+          process.env.AWS_SECRET_ACCESS_KEY ||
+          '',
       },
       forcePathStyle: true, 
     });
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
-    const bucketName = process.env.S3_BUCKET_NAME || 'objects';
+    const bucketName = process.env.S3_BUCKET_NAME || 'heyama-bucket';
     const fileName = `uploads/${Date.now()}-${file.originalname}`;
 
     await this.s3Client.send(
@@ -31,6 +35,11 @@ export class S3Service {
     );
 
 
-    return `${process.env.S3_ENDPOINT}/${bucketName}/${fileName}`;
+    const endpoint = process.env.S3_ENDPOINT || process.env.AWS_ENDPOINT || '';
+
+    
+    const baseUrl = endpoint.replace(/\/storage\/v1\/s3\/?$/, '');
+
+    return `${baseUrl}/storage/v1/object/public/${bucketName}/${fileName}`;
   }
 }
